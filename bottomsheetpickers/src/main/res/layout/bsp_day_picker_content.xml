@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <include layout="@layout/bsp_date_picker_navigation_bar" />
+
+    <com.philliphsu.bottomsheetpickers.date.DayPickerViewAnimator
+        android:id="@+id/bsp_month_animator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.philliphsu.bottomsheetpickers.date.DayPickerViewPager
+            android:id="@+id/bsp_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.philliphsu.bottomsheetpickers.date.MonthPickerView
+            android:id="@+id/bsp_month_picker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.philliphsu.bottomsheetpickers.date.DayPickerViewAnimator>
+
+</merge>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <RelativeLayout
+        android:id="@+id/title_content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="47.5dp"
+        android:background="@color/big_red">
+
+        <TextView
+            android:id="@+id/titlebar_text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/titlebar_img_back"
+            android:maxEms="8"
+            android:singleLine="true"
+            android:text="选择日历"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/titlebar_img_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:padding="5dp"
+            android:src="@drawable/back_ic"
+            android:visibility="visible" />
+    </RelativeLayout>
+
+    <com.wz.caldroid.CalendarPickerView
+        android:id="@+id/calendar_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="16dp"
+        android:scrollbarStyle="outsideOverlay"
+        android:clipToPadding="false"
+        android:background="#FFFFFF"
+        />
+</LinearLayout>

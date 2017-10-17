@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingStart="@dimen/bsp_month_view_edge_padding"
+              android:paddingLeft="@dimen/bsp_month_view_edge_padding"
+              android:paddingEnd="@dimen/bsp_month_view_edge_padding"
+              android:paddingRight="@dimen/bsp_month_view_edge_padding"
+              android:paddingTop="@dimen/bsp_month_view_top_padding">
+
+    <ImageButton
+        android:id="@+id/bsp_prev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="@dimen/bsp_month_navigation_bar_height"
+        android:minHeight="@dimen/bsp_month_navigation_bar_height"
+        android:visibility="invisible"
+        android:nextFocusForward="@+id/bsp_month_year_title"
+        android:nextFocusDown="@+id/bsp_month_view"
+        app:srcCompat="@drawable/bsp_ic_chevron_start"
+        style="@style/BSP_SelectableButton"/>
+
+    <FrameLayout
+        android:id="@+id/bsp_month_year_title_container"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/bsp_month_navigation_bar_height"
+        android:layout_weight="1"
+        android:background="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/bsp_month_year_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:nextFocusForward="@+id/bsp_next"
+            android:nextFocusDown="@+id/bsp_month_view"
+            android:textSize="@dimen/bsp_month_label_size"
+            android:textAllCaps="false"
+            android:drawablePadding="4dp"/>
+
+    </FrameLayout>
+
+    <ImageButton
+        android:id="@+id/bsp_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="@dimen/bsp_month_navigation_bar_height"
+        android:minHeight="@dimen/bsp_month_navigation_bar_height"
+        android:visibility="invisible"
+        android:nextFocusForward="@+id/bsp_month_view"
+        android:nextFocusDown="@+id/bsp_month_view"
+        app:srcCompat="@drawable/bsp_ic_chevron_end"
+        style="@style/BSP_SelectableButton"/>
+
+</LinearLayout>
