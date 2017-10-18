@@ -78,29 +78,31 @@ public class CalendarGridView extends ViewGroup {
     super.addView(child, index, params);
   }
 
-  @Override protected void dispatchDraw(Canvas canvas) {
-    super.dispatchDraw(canvas);
-    final ViewGroup row = (ViewGroup) getChildAt(1);
-    int top = row.getTop();
-    int bottom = getBottom();
-    // Left side border.
-    final int left = row.getChildAt(0).getLeft() + getLeft();
-    canvas.drawLine(left + FLOAT_FUDGE, top, left + FLOAT_FUDGE, bottom, dividerPaint);
-
-    // Each cell's right-side border.
-    for (int c = 0; c < 7; c++) {
-      float x = left + row.getChildAt(c).getRight() - FLOAT_FUDGE;
-      canvas.drawLine(x, top, x, bottom, dividerPaint);
-    }
-  }
-
-  @Override protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-    final boolean retVal = super.drawChild(canvas, child, drawingTime);
-    // Draw a bottom border.
-    final int bottom = child.getBottom() - 1;
-    canvas.drawLine(child.getLeft(), bottom, child.getRight() - 2, bottom, dividerPaint);
-    return retVal;
-  }
+  /*--------------------------此处画日历的分割线--------------------------*/
+//  @Override protected void dispatchDraw(Canvas canvas) {
+//    super.dispatchDraw(canvas);
+//    final ViewGroup row = (ViewGroup) getChildAt(1);
+//    int top = row.getTop();
+//    int bottom = getBottom();
+//    // Left side border.
+//    final int left = row.getChildAt(0).getLeft() + getLeft();
+//    canvas.drawLine(left + FLOAT_FUDGE, top, left + FLOAT_FUDGE, bottom, dividerPaint);
+//
+//    // Each cell's right-side border.
+//    for (int c = 0; c < 7; c++) {
+//      float x = left + row.getChildAt(c).getRight() - FLOAT_FUDGE;
+//      canvas.drawLine(x, top, x, bottom, dividerPaint);
+//    }
+//  }
+//
+//  @Override protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
+//    final boolean retVal = super.drawChild(canvas, child, drawingTime);
+//    // Draw a bottom border.
+//    final int bottom = child.getBottom() - 1;
+//    canvas.drawLine(child.getLeft(), bottom, child.getRight() - 2, bottom, dividerPaint);
+//    return retVal;
+//  }
+    /*--------------------------此处画日历的分割线--------------------------*/
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     Logr.d("Grid.onMeasure w=%s h=%s", MeasureSpec.toString(widthMeasureSpec),

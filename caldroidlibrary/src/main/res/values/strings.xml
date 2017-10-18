@@ -2,4 +2,8 @@
     <string name="day_name_format">EEE</string>
     <string name="invalid_date">Date must be between %1$s and %2$s.</string>
     <string name="month_name_format">MMMM yyyy</string>
+    <string name="leave_day">离开：</string>
+    <string name="order_day">入住：</string>
+    <string name="instead_char">一一</string>
+    <string name="total_day">总共：</string>
 </resources>

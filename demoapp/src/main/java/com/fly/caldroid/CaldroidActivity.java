@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import com.wz.caldroid.CalendarCellDecorator;
@@ -33,6 +34,7 @@ public class CaldroidActivity extends Activity {
         lastYear.add(Calendar.MONTH, 0);
 
         calendar = (CalendarPickerView) findViewById(R.id.calendar_view);
+
         Calendar today = Calendar.getInstance();
         ArrayList<Date> dates = new ArrayList<Date>();
         if (seleteTime>0){
@@ -44,7 +46,7 @@ public class CaldroidActivity extends Activity {
 
         calendar.setDecorators(Collections.<CalendarCellDecorator>emptyList());
         calendar.init(lastYear.getTime(), nextYear.getTime()) //
-                .inMode(CalendarPickerView.SelectionMode.MULTIPLE) //
+                .inMode(CalendarPickerView.SelectionMode.RANGE) //
                 .withSelectedDate(dates.get(0));
         initButtonListeners();
     }
@@ -58,7 +60,7 @@ public class CaldroidActivity extends Activity {
                 Intent intent = new Intent();
                 intent.putExtra("SELETE_DATA_TIME", calendar.getSelectedDate().getTime());
                 setResult(2, intent);
-                finish();
+//                finish();
             }
 
             @Override
