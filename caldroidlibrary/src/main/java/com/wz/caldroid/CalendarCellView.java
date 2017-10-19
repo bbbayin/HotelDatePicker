@@ -38,6 +38,7 @@ public class CalendarCellView extends FrameLayout {
   private boolean isHighlighted = false;
   private RangeState rangeState = RangeState.NONE;
   private TextView dayOfMonthTextView;
+  private TextView stateTextView;
 
   @SuppressWarnings("UnusedDeclaration") //
   public CalendarCellView(Context context, AttributeSet attrs) {
@@ -103,7 +104,7 @@ public class CalendarCellView extends FrameLayout {
     }
 
     if (isToday) {
-      mergeDrawableStates(drawableState, STATE_TODAY);
+//      mergeDrawableStates(drawableState, STATE_TODAY);
     }
 
     if (isHighlighted) {
@@ -125,6 +126,10 @@ public class CalendarCellView extends FrameLayout {
     dayOfMonthTextView = textView;
   }
 
+  public void setDayStateTextView(TextView textView){
+    stateTextView = textView;
+  }
+
   public TextView getDayOfMonthTextView() {
     if (dayOfMonthTextView == null) {
       throw new IllegalStateException(
@@ -132,5 +137,14 @@ public class CalendarCellView extends FrameLayout {
       );
     }
     return dayOfMonthTextView;
+  }
+
+  public TextView getStateTextView() {
+    if (stateTextView == null) {
+      throw new IllegalStateException(
+              "You have to stateTextView in your custom DayViewAdapter."
+      );
+    }
+    return stateTextView;
   }
 }
