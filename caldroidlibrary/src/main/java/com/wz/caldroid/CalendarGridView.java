@@ -4,6 +4,7 @@ package com.wz.caldroid;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
@@ -52,7 +53,7 @@ public class CalendarGridView extends ViewGroup {
 
   public void setDayTextColor(int resId) {
     for (int i = 0; i < getChildCount(); i++) {
-      ColorStateList colors = getResources().getColorStateList(resId);
+      ColorStateList colors = getResources().getColorStateList(R.color.my_text_selector);
       ((CalendarRowView) getChildAt(i)).setCellTextColor(colors);
     }
   }

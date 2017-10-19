@@ -101,6 +101,7 @@ public class MonthView extends LinearLayout {
         grid = (CalendarGridView) findViewById(R.id.calendar_grid);
     }
 
+
     public void init(MonthDescriptor month, List<List<MonthCellDescriptor>> cells,
                      boolean displayOnly, Typeface titleTypeface, Typeface dateTypeface) {
         Logr.d("Initializing MonthView (%d) for %s", System.identityHashCode(this), month);
@@ -134,6 +135,9 @@ public class MonthView extends LinearLayout {
                     cellView.setRangeState(cell.getRangeState());
                     cellView.setHighlighted(cell.isHighlighted());
                     cellView.setTag(cell);
+
+                    if (cellView.isToday())
+                        cellView.getDayOfMonthTextView().setText("今天");
 
                     if (null != decorators) {
                         for (CalendarCellDecorator decorator : decorators) {

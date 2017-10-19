@@ -9,9 +9,9 @@
   <item android:state_selected="true">
     <color android:color="@color/calendar_selected_day_bg"/>
   </item>
-  <item android:state_pressed="true">
-    <color android:color="@color/calendar_selected_day_bg"/>
-  </item>
+  <!--<item android:state_pressed="true">-->
+    <!--<color android:color="@color/calendar_selected_day_bg"/>-->
+  <!--</item>-->
   <item app:tsquare_state_current_month="false">
     <color android:color="@color/calendar_inactive_month_bg"/>
   </item>
@@ -21,7 +21,10 @@
   <!--<item app:tsquare_state_today="true">-->
     <!--<color android:color="@color/calendar_text_active"/>-->
   <!--</item>-->
+  <!--<item>-->
+    <!--<color android:color="@color/calendar_active_month_bg"/>-->
+  <!--</item>-->
   <item>
-    <color android:color="@color/calendar_active_month_bg"/>
+    <color android:color="#fff"/>
   </item>
 </selector>

@@ -1,4 +1,3 @@
-// Copyright 2013 Square, Inc.
 
 package com.wz.caldroid;
 
@@ -9,6 +8,9 @@ import android.widget.TextView;
 
 import com.wz.caldroid.MonthCellDescriptor.RangeState;
 
+/**
+ * 描述：日历的日期控件
+ */
 public class CalendarCellView extends FrameLayout {
   private static final int[] STATE_SELECTABLE = {
       R.attr.tsquare_state_selectable

@@ -51,8 +51,8 @@ public class CalendarPickerView extends ListView {
     final List<MonthDescriptor> months = new ArrayList<>();
     final List<MonthCellDescriptor> selectedCells = new ArrayList<>();
     final List<MonthCellDescriptor> highlightedCells = new ArrayList<>();
-    final List<Calendar> selectedCals = new ArrayList<>();
-    final List<Calendar> highlightedCals = new ArrayList<>();
+    final List<Calendar> selectedCalendars = new ArrayList<>();
+    final List<Calendar> highlightedCalendars = new ArrayList<>();
     private Locale locale;
     private DateFormat monthNameFormat;
     private DateFormat weekdayNameFormat;
@@ -102,8 +102,9 @@ public class CalendarPickerView extends ListView {
                 res.getColor(R.color.calendar_divider));
         dayBackgroundResId = a.getResourceId(R.styleable.CalendarPickerView_tsquare_dayBackground,
                 R.drawable.calendar_bg_selector);
-        dayTextColorResId = a.getResourceId(R.styleable.CalendarPickerView_tsquare_dayTextColor,
-                R.color.my_text_selector);
+//        dayTextColorResId = a.getResourceId(R.styleable.CalendarPickerView_tsquare_dayTextColor,
+//                R.color.my_text_selector);
+        dayTextColorResId = R.color.my_text_selector;
         titleTextColor = a.getColor(R.styleable.CalendarPickerView_tsquare_titleTextColor,
                 res.getColor(R.color.calendar_text_active));
         displayHeader = a.getBoolean(R.styleable.CalendarPickerView_tsquare_displayHeader, true);
@@ -180,9 +181,9 @@ public class CalendarPickerView extends ListView {
 
         this.selectionMode = SelectionMode.SINGLE;
         // Clear out any previously-selected dates/cells.
-        selectedCals.clear();
+        selectedCalendars.clear();
         selectedCells.clear();
-        highlightedCals.clear();
+        highlightedCalendars.clear();
         highlightedCells.clear();
 
         // Clear previous state.
@@ -338,7 +339,7 @@ public class CalendarPickerView extends ListView {
         for (int c = 0; c < months.size(); c++) {
             MonthDescriptor month = months.get(c);
             if (selectedIndex == null) {
-                for (Calendar selectedCal : selectedCals) {
+                for (Calendar selectedCal : selectedCalendars) {
                     if (sameMonth(selectedCal, month)) {
                         selectedIndex = c;
                         break;
@@ -442,7 +443,7 @@ public class CalendarPickerView extends ListView {
     }
 
     public Date getSelectedDate() {
-        return (selectedCals.size() > 0 ? selectedCals.get(0).getTime() : null);
+        return (selectedCalendars.size() > 0 ? selectedCalendars.get(0).getTime() : null);
     }
 
     public List<Date> getSelectedDates() {
@@ -562,10 +563,10 @@ public class CalendarPickerView extends ListView {
 
         switch (selectionMode) {
             case RANGE:
-                if (selectedCals.size() > 1) {
+                if (selectedCalendars.size() > 1) {
                     // We've already got a range selected: clear the old one.
                     clearOldSelections();
-                } else if (selectedCals.size() == 1 && newlySelectedCal.before(selectedCals.get(0))) {
+                } else if (selectedCalendars.size() == 1 && newlySelectedCal.before(selectedCalendars.get(0))) {
                     // We're moving the start of the range back in time: clear the old start date.
                     clearOldSelections();
                 }
@@ -591,7 +592,7 @@ public class CalendarPickerView extends ListView {
                 if (mOnStarAndEndSelectedListener != null)
                     mOnStarAndEndSelectedListener.onFirstDateSelected(date);
             }
-            selectedCals.add(newlySelectedCal);
+            selectedCalendars.add(newlySelectedCal);
 
             if (selectionMode == SelectionMode.RANGE && selectedCells.size() > 1) {
                 // Select all days in between start and end.
@@ -644,7 +645,7 @@ public class CalendarPickerView extends ListView {
             }
         }
         selectedCells.clear();
-        selectedCals.clear();
+        selectedCalendars.clear();
     }
 
     private OnStarAndEndSelectedListener mOnStarAndEndSelectedListener;
@@ -663,9 +664,9 @@ public class CalendarPickerView extends ListView {
                 break;
             }
         }
-        for (Calendar cal : selectedCals) {
+        for (Calendar cal : selectedCalendars) {
             if (sameDate(cal, selectedCal)) {
-                selectedCals.remove(cal);
+                selectedCalendars.remove(cal);
                 break;
             }
         }
@@ -683,7 +684,7 @@ public class CalendarPickerView extends ListView {
                 MonthCellDescriptor cell = monthCellWithMonthIndex.cell;
 
                 highlightedCells.add(cell);
-                highlightedCals.add(newlyHighlightedCal);
+                highlightedCalendars.add(newlyHighlightedCal);
                 cell.setHighlighted(true);
             }
         }
@@ -696,7 +697,7 @@ public class CalendarPickerView extends ListView {
             cal.setHighlighted(false);
         }
         highlightedCells.clear();
-        highlightedCals.clear();
+        highlightedCalendars.clear();
 
         validateAndUpdate();
     }
@@ -796,29 +797,29 @@ public class CalendarPickerView extends ListView {
         }
         cal.add(Calendar.DATE, offset);
 
-        Calendar minSelectedCal = minDate(selectedCals);
-        Calendar maxSelectedCal = maxDate(selectedCals);
+        Calendar minSelectedCal = minDate(selectedCalendars);
+        Calendar maxSelectedCal = maxDate(selectedCalendars);
 
-        while ((cal.get(MONTH) < month.getMonth() + 1 || cal.get(YEAR) < month.getYear()) //
-                && cal.get(YEAR) <= month.getYear()) {
+        while ((cal.get(MONTH) < month.getMonth() + 1 || cal.get(YEAR) < month.getYear())
+                &&cal.get(YEAR) <= month.getYear()) {
             Logr.d("Building week row starting at %s", cal.getTime());
             List<MonthCellDescriptor> weekCells = new ArrayList<>();
             cells.add(weekCells);
             for (int c = 0; c < 7; c++) {
                 Date date = cal.getTime();
                 boolean isCurrentMonth = cal.get(MONTH) == month.getMonth();
-                boolean isSelected = isCurrentMonth && containsDate(selectedCals, cal);
+                boolean isSelected = isCurrentMonth && containsDate(selectedCalendars, cal);
                 boolean isSelectable =
                         isCurrentMonth && betweenDates(cal, minCal, maxCal) && isDateSelectable(date);
                 boolean isToday = sameDate(cal, today);
-                boolean isHighlighted = containsDate(highlightedCals, cal);
+                boolean isHighlighted = containsDate(highlightedCalendars, cal);
                 int value = cal.get(DAY_OF_MONTH);
 
                 MonthCellDescriptor.RangeState rangeState = MonthCellDescriptor.RangeState.NONE;
-                if (selectedCals.size() > 1) {
+                if (selectedCalendars.size() > 1) {
                     if (sameDate(minSelectedCal, cal)) {
                         rangeState = MonthCellDescriptor.RangeState.FIRST;
-                    } else if (sameDate(maxDate(selectedCals), cal)) {
+                    } else if (sameDate(maxDate(selectedCalendars), cal)) {
                         rangeState = MonthCellDescriptor.RangeState.LAST;
                     } else if (betweenDates(cal, minSelectedCal, maxSelectedCal)) {
                         rangeState = MonthCellDescriptor.RangeState.MIDDLE;
