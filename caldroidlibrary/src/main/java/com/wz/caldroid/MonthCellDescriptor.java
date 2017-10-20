@@ -1,4 +1,3 @@
-// Copyright 2012 Square, Inc.
 
 package com.wz.caldroid;
 
@@ -22,7 +21,7 @@ class MonthCellDescriptor {
     private RangeState rangeState;
 
     private boolean isBooked;//该天的状态，是否被预订
-    private float price;//价格
+    private String price;//价格
 
     public boolean isBooked() {
         return isBooked;
@@ -32,11 +31,11 @@ class MonthCellDescriptor {
         isBooked = booked;
     }
 
-    public float getPrice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 
@@ -55,7 +54,7 @@ class MonthCellDescriptor {
      * @param price
      */
     MonthCellDescriptor(Date date, boolean currentMonth, boolean selectable, boolean selected,
-                        boolean today, boolean highlighted, int value, RangeState rangeState, boolean isBooked, float price) {
+                        boolean today, boolean highlighted, int value, RangeState rangeState, boolean isBooked, String price) {
         this.date = date;
         isCurrentMonth = currentMonth;
         isSelectable = selectable;

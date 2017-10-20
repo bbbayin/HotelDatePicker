@@ -9,10 +9,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSON;
 import com.wz.caldroid.CalendarCellDecorator;
 import com.wz.caldroid.CalendarPickerView;
+import com.wz.caldroid.Constants;
+import com.wz.caldroid.bean.PriceDescriptor;
 import com.wz.caldroid.listener.OnStarAndEndSelectedListener;
 import com.wz.caldroid.util.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,9 +39,28 @@ public class CaldroidActivity extends Activity {
 
 
         setContentView(R.layout.calendar_activity);
+        ArrayList<Date> dates = new ArrayList<Date>();
+
+        //设置已租日期
+        try {
+            JSONObject oJson = new JSONObject(Constants.TestJson);
+            JSONArray arrOrderedDate = oJson.getJSONArray("hotel_time");
+            if (arrOrderedDate != null && arrOrderedDate.length() > 0) {
+                for (int i = 0; i < arrOrderedDate.length(); i++) {
+                    JSONObject objDate = (JSONObject) arrOrderedDate.get(i);
+                    dates.addAll(Utils.findDates(new Date(Utils.getTimeStemp(objDate.getString("live_time"))),
+                            new Date(Utils.getTimeStemp(objDate.getString("end_time")))));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        //价格
+        PriceDescriptor priceDescriptor = JSON.parseObject(Constants.TestJson, PriceDescriptor.class);
 
         Bundle myBundle = getIntent().getExtras();
         long seleteTime = myBundle.getLong("selete_time");
+
         final Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.MONTH, 3);
 
@@ -46,19 +72,13 @@ public class CaldroidActivity extends Activity {
         mTvEndDay = (TextView) findViewById(R.id.list_header_tv_leave_day);
         mTvTotal = (TextView) findViewById(R.id.list_header_tv_total);
 
-        Calendar today = Calendar.getInstance();
-        ArrayList<Date> dates = new ArrayList<Date>();
-        if (seleteTime > 0) {
-            Date d1 = new Date(seleteTime);
-            dates.add(d1);
-        } else {
-            dates.add(today.getTime());
-        }
 
         calendar.setDecorators(Collections.<CalendarCellDecorator>emptyList());
-        calendar.init(lastYear.getTime(), nextYear.getTime()) //
+        calendar.init(lastYear.getTime(), nextYear.getTime(),priceDescriptor) //
                 .inMode(CalendarPickerView.SelectionMode.RANGE) //
-                .withSelectedDate(dates.get(0));
+//                .withSelectedDate(dates.get(0))
+                .withHighlightedDates(dates)
+        ;
         initButtonListeners();
     }
 

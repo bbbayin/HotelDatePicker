@@ -138,6 +138,11 @@ public class MonthView extends LinearLayout {
 
                     if (cellView.isToday())
                         cellView.getDayOfMonthTextView().setText("今天");
+                    if (cell.isBooked()){
+                        cellView.getStateTextView().setText("已租");
+                    }else {
+                        cellView.getStateTextView().setText("¥"+cell.getPrice());
+                    }
 
                     if (null != decorators) {
                         for (CalendarCellDecorator decorator : decorators) {
