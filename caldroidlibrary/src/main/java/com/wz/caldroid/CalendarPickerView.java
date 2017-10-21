@@ -39,6 +39,13 @@ import static java.util.Calendar.MONTH;
 import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
 
+/**
+ * 描述：日历选择控件
+ * <p>
+ * 日期选择逻辑：boolean：（tag）  Date: （startDate，endDate）
+ * 1.
+ */
+
 public class CalendarPickerView extends ListView {
     public enum SelectionMode {
         SINGLE,
@@ -80,6 +87,12 @@ public class CalendarPickerView extends ListView {
     private CellClickInterceptor cellClickInterceptor;
     private List<CalendarCellDecorator> decorators;
     private DayViewAdapter dayViewAdapter = new DefaultDayViewAdapter();
+
+    private List<Date> mBookedList = new ArrayList<Date>();
+
+    private List<Date> cannotBookedList = new ArrayList<>();//选择起始日期后，实时更新不可点击的列表
+    private List<Date> liveDateList = new ArrayList<>();//已经预定的，入住日期，该列表的日期可以当做新预定的结束时间（可选）
+
 
     public void setDecorators(List<CalendarCellDecorator> decorators) {
         this.decorators = decorators;
@@ -211,7 +224,7 @@ public class CalendarPickerView extends ListView {
             MonthDescriptor month =
                     new MonthDescriptor(monthCounter.get(MONTH), monthCounter.get(YEAR), date,
                             Utils.formatDateToMMYYYY(date));
-            cells.add(getMonthCells(month, monthCounter,priceDescriptor));
+            cells.add(getMonthCells(month, monthCounter, priceDescriptor));
             Logr.d("Adding month %s", month);
             months.add(month);
             monthCounter.add(MONTH, 1);
@@ -221,23 +234,7 @@ public class CalendarPickerView extends ListView {
         return new FluentInitializer();
     }
 
-    /**
-     * Both date parameters must be non-null and their {@link Date#getTime()} must not return 0. Time
-     * of day will be ignored.  For instance, if you pass in {@code minDate} as 11/16/2012 5:15pm and
-     * {@code maxDate} as 11/16/2013 4:30am, 11/16/2012 will be the first selectable date and
-     * 11/15/2013 will be the last selectable date ({@code maxDate} is exclusive).
-     * <p>
-     * This will implicitly set the {@link SelectionMode} to {@link SelectionMode#SINGLE}.  If you
-     * want a different selection mode, use {@link FluentInitializer#inMode(SelectionMode)} on the
-     * {@link FluentInitializer} this method returns.
-     * <p>
-     * The calendar will be constructed using the default locale as returned by
-     * {@link Locale#getDefault()}. If you wish the calendar to be constructed using a
-     * different locale, use {@link #init(Date, Date, PriceDescriptor,Locale)}.
-     *
-     * @param minDate Earliest selectable date, inclusive.  Must be earlier than {@code maxDate}.
-     * @param maxDate Latest selectable date, exclusive.  Must be later than {@code minDate}.
-     */
+
     public FluentInitializer init(Date minDate, Date maxDate, PriceDescriptor priceDescriptor) {
         return init(minDate, maxDate, priceDescriptor, Locale.getDefault());
     }
@@ -284,7 +281,13 @@ public class CalendarPickerView extends ListView {
         }
 
         public FluentInitializer withHighlightedDates(Collection<Date> dates) {
+            mBookedList = (List<Date>) dates;
             highlightDates(dates);
+            return this;
+        }
+
+        public FluentInitializer withLiveDates(List<Date> dates) {
+            liveDateList = dates;
             return this;
         }
 
@@ -477,11 +480,17 @@ public class CalendarPickerView extends ListView {
         @Override
         public void handleClick(MonthCellDescriptor cell) {
             Date clickedDate = cell.getDate();
-            if (cell.isHighlighted()) return;
+            //没有被选中的日期时，highlight不可点击
+            if (selectedCalendars.size() == 0 && cell.isHighlighted()) return;
+            //选中了入住日期时，如果点击的日期是highlight，而且不是已经预定的入住日期，不可点击
+            if (selectedCalendars.size() == 1 && cell.isHighlighted() && !liveDateList.contains(clickedDate))
+                return;
+            //设置了拦截的不可点击
             if (cellClickInterceptor != null && cellClickInterceptor.onCellClicked(clickedDate)) {
                 return;
             }
             if (!betweenDates(clickedDate, minCal, maxCal) || !isDateSelectable(clickedDate)) {
+                //点击了今天以前的日期
                 if (invalidDateListener != null) {
                     invalidDateListener.onInvalidDateSelected(clickedDate);
                 }
@@ -551,6 +560,13 @@ public class CalendarPickerView extends ListView {
         }
     }
 
+    /**
+     * 处理点击事件
+     *
+     * @param date
+     * @param cell
+     * @return
+     */
     private boolean doSelectDate(Date date, MonthCellDescriptor cell) {
         Calendar newlySelectedCal = Calendar.getInstance(locale);
         newlySelectedCal.setTime(date);
@@ -568,7 +584,6 @@ public class CalendarPickerView extends ListView {
                     // We've already got a range selected: clear the old one.
                     clearOldSelections();
                 } else if (selectedCalendars.size() == 1 && newlySelectedCal.before(selectedCalendars.get(0))) {
-                    // We're moving the start of the range back in time: clear the old start date.
                     clearOldSelections();
                 }
                 break;
@@ -586,12 +601,24 @@ public class CalendarPickerView extends ListView {
         }
 
         if (date != null) {
-            // Select a new cell.
+            //选择起始日期
             if (selectedCells.size() == 0 || !selectedCells.get(0).equals(cell)) {
                 selectedCells.add(cell);
                 cell.setSelected(true);
-                if (mOnStarAndEndSelectedListener != null)
-                    mOnStarAndEndSelectedListener.onFirstDateSelected(date);
+                if (mBookedList.size() != 0) {
+                    //根据已经选择的起始日期，更新之后的可点击区域
+                    if (date.before(mBookedList.get(0)))
+                        disableDates(mBookedList.get(0), maxCal.getTime());
+                }
+            } else if (selectedCalendars.size() == 1) {
+                //已经选了起始日期
+                if (date.equals(selectedCalendars.get(0).getTime())) {
+                    //再次点击，取消选择
+                    clearOldSelections();
+                    clearDisabledDates();
+                    validateAndUpdate();
+                    return false;
+                }
             }
             selectedCalendars.add(newlySelectedCal);
 
@@ -601,11 +628,6 @@ public class CalendarPickerView extends ListView {
                 Date end = selectedCells.get(1).getDate();
                 selectedCells.get(0).setRangeState(MonthCellDescriptor.RangeState.FIRST);
                 selectedCells.get(1).setRangeState(MonthCellDescriptor.RangeState.LAST);
-                //select second cell
-                if (mOnStarAndEndSelectedListener != null) {
-                    mOnStarAndEndSelectedListener.onEndDateSelected(date);
-                    mOnStarAndEndSelectedListener.onDateSelectedFinish();
-                }
                 for (List<List<MonthCellDescriptor>> month : cells) {
                     for (List<MonthCellDescriptor> week : month) {
                         for (MonthCellDescriptor singleCell : week) {
@@ -618,6 +640,18 @@ public class CalendarPickerView extends ListView {
                             }
                         }
                     }
+                }
+            }
+
+            if (mOnStarAndEndSelectedListener != null) {
+                if (selectedCalendars.size() == 1)
+                    //开始日期
+                    mOnStarAndEndSelectedListener.onFirstDateSelected(date);
+                    //结束
+                else if (selectedCalendars.size() == 2) {
+                    mOnStarAndEndSelectedListener.onEndDateSelected(date);
+                    mOnStarAndEndSelectedListener.onDateSelectedFinish(selectedCells.size() - 1);
+                    clearDisabledDates();
                 }
             }
         }
@@ -687,10 +721,57 @@ public class CalendarPickerView extends ListView {
                 highlightedCells.add(cell);
                 highlightedCalendars.add(newlyHighlightedCal);
                 cell.setHighlighted(true);
+                cell.setBooked(true);
             }
         }
-
         validateAndUpdate();
+    }
+
+    /**
+     * 设置日期不可选
+     *
+     * @param begin
+     * @param end
+     */
+    public void disableDates(Date begin, Date end) {
+        cannotBookedList = Utils.findDates(begin, end);
+        cannotBookedList.remove(cannotBookedList.size() - 1);
+        for (Date date : cannotBookedList) {
+            validateDate(date);
+
+            MonthCellWithMonthIndex monthCellWithMonthIndex = getMonthCellWithIndexByDate(date);
+            if (monthCellWithMonthIndex != null) {
+                Calendar newlyHighlightedCal = Calendar.getInstance();
+                newlyHighlightedCal.setTime(date);
+                final MonthCellDescriptor cell = monthCellWithMonthIndex.cell;
+
+                highlightedCells.add(cell);
+                highlightedCalendars.add(newlyHighlightedCal);
+                cell.setHighlighted(true);
+            }
+        }
+        validateAndUpdate();
+    }
+
+    /**
+     * 重置禁用的日期
+     */
+    public void clearDisabledDates() {
+        for (Date date : cannotBookedList) {
+            validateDate(date);
+            if (mBookedList.contains(date)) continue;
+            MonthCellWithMonthIndex monthCellWithMonthIndex = getMonthCellWithIndexByDate(date);
+            if (monthCellWithMonthIndex != null) {
+                Calendar newlyHighlightedCal = Calendar.getInstance();
+                newlyHighlightedCal.setTime(date);
+                final MonthCellDescriptor cell = monthCellWithMonthIndex.cell;
+
+                highlightedCells.remove(cell);
+                highlightedCalendars.remove(newlyHighlightedCal);
+                cell.setHighlighted(false);
+            }
+        }
+//        validateAndUpdate();
     }
 
     public void clearHighlightedDates() {
@@ -786,7 +867,7 @@ public class CalendarPickerView extends ListView {
         }
     }
 
-    List<List<MonthCellDescriptor>> getMonthCells(MonthDescriptor month, Calendar startCal,PriceDescriptor priceDescriptor) {
+    List<List<MonthCellDescriptor>> getMonthCells(MonthDescriptor month, Calendar startCal, PriceDescriptor priceDescriptor) {
         Calendar cal = Calendar.getInstance(locale);
         cal.setTime(startCal.getTime());
         List<List<MonthCellDescriptor>> cells = new ArrayList<>();
@@ -827,13 +908,9 @@ public class CalendarPickerView extends ListView {
                     }
                 }
 
-//                weekCells.add(
-//                        new MonthCellDescriptor(date, isCurrentMonth, isSelectable, isSelected, isToday,
-//                                isHighlighted, value, rangeState));
-
                 weekCells.add(
                         new MonthCellDescriptor(date, isCurrentMonth, isSelectable, isSelected, isToday,
-                                isHighlighted, value, rangeState, false, priceDescriptor.getWorkdayPrice()));
+                                isHighlighted, value, rangeState, false, priceDescriptor));
                 cal.add(DATE, 1);
             }
         }
@@ -913,7 +990,7 @@ public class CalendarPickerView extends ListView {
      * Set a listener used to discriminate between selectable and unselectable dates. Set this to
      * disable arbitrary dates as they are rendered.
      * <p>
-     * Important: set this before you call {@link #init(Date, Date,PriceDescriptor)} methods.  If called afterwards,
+     * Important: set this before you call {@link #init(Date, Date, PriceDescriptor)} methods.  If called afterwards,
      * it will not be consistently applied.
      */
     public void setDateSelectableFilter(DateSelectableFilter listener) {
@@ -924,7 +1001,7 @@ public class CalendarPickerView extends ListView {
     /**
      * Set an adapter used to initialize {@link CalendarCellView} with custom layout.
      * <p>
-     * Important: set this before you call {@link #init(Date, Date,PriceDescriptor)} methods.  If called afterwards,
+     * Important: set this before you call {@link #init(Date, Date, PriceDescriptor)} methods.  If called afterwards,
      * it will not be consistently applied.
      */
     public void setCustomDayView(DayViewAdapter dayViewAdapter) {

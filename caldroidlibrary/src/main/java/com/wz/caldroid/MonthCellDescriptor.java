@@ -1,6 +1,8 @@
 
 package com.wz.caldroid;
 
+import com.wz.caldroid.bean.PriceDescriptor;
+
 import java.util.Date;
 
 /**
@@ -21,7 +23,7 @@ class MonthCellDescriptor {
     private RangeState rangeState;
 
     private boolean isBooked;//该天的状态，是否被预订
-    private String price;//价格
+    private PriceDescriptor price;//价格
 
     public boolean isBooked() {
         return isBooked;
@@ -31,11 +33,11 @@ class MonthCellDescriptor {
         isBooked = booked;
     }
 
-    public String getPrice() {
+    public PriceDescriptor getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(PriceDescriptor price) {
         this.price = price;
     }
 
@@ -54,7 +56,7 @@ class MonthCellDescriptor {
      * @param price
      */
     MonthCellDescriptor(Date date, boolean currentMonth, boolean selectable, boolean selected,
-                        boolean today, boolean highlighted, int value, RangeState rangeState, boolean isBooked, String price) {
+                        boolean today, boolean highlighted, int value, RangeState rangeState, boolean isBooked, PriceDescriptor price) {
         this.date = date;
         isCurrentMonth = currentMonth;
         isSelectable = selectable;

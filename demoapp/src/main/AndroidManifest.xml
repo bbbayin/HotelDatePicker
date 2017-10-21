@@ -19,6 +19,7 @@
         <activity
             android:name=".CaldroidActivity"
             android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/ActionSheetDialogStyle"
             android:screenOrientation="portrait" />
     </application>
 

@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
@@ -39,7 +42,20 @@ public class CaldroidActivity extends Activity {
 
 
         setContentView(R.layout.calendar_activity);
+        //设置窗口参数
+        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        int height = wm.getDefaultDisplay().getHeight();
+        int width = wm.getDefaultDisplay().getWidth();
+
+        Window window = getWindow();
+        window.setGravity(Gravity.BOTTOM);
+        WindowManager.LayoutParams attributes = window.getAttributes();
+        attributes.width = width;
+        attributes.height = (int) (height * 0.8);
+        window.setAttributes(attributes);
+
         ArrayList<Date> dates = new ArrayList<Date>();
+        ArrayList<Date> liveDates = new ArrayList<Date>();
 
         //设置已租日期
         try {
@@ -48,8 +64,10 @@ public class CaldroidActivity extends Activity {
             if (arrOrderedDate != null && arrOrderedDate.length() > 0) {
                 for (int i = 0; i < arrOrderedDate.length(); i++) {
                     JSONObject objDate = (JSONObject) arrOrderedDate.get(i);
-                    dates.addAll(Utils.findDates(new Date(Utils.getTimeStemp(objDate.getString("live_time"))),
+                    Date live_time = new Date(Utils.getTimeStemp(objDate.getString("live_time")));
+                    dates.addAll(Utils.findDates(live_time,
                             new Date(Utils.getTimeStemp(objDate.getString("end_time")))));
+                    liveDates.add(live_time);
                 }
             }
         } catch (JSONException e) {
@@ -74,12 +92,33 @@ public class CaldroidActivity extends Activity {
 
 
         calendar.setDecorators(Collections.<CalendarCellDecorator>emptyList());
-        calendar.init(lastYear.getTime(), nextYear.getTime(),priceDescriptor) //
+        calendar.init(lastYear.getTime(), nextYear.getTime(), priceDescriptor) //
                 .inMode(CalendarPickerView.SelectionMode.RANGE) //
 //                .withSelectedDate(dates.get(0))
                 .withHighlightedDates(dates)
-        ;
+                .withLiveDates(liveDates);
         initButtonListeners();
+
+        //click event
+        findViewById(R.id.list_header_tv_cancel).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        findViewById(R.id.list_header_tv_ok).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                if (null != calendar.getSelectedDate() && calendar.getSelectedDates().size() >= 2) {
+                    intent.putExtra("START_DATA_TIME", calendar.getSelectedDates().get(0).getTime());
+                    intent.putExtra("END_DATA_TIME", calendar.getSelectedDates().get(calendar.getSelectedDates().size()-1).getTime());
+                    setResult(2, intent);
+                    finish();
+                }
+            }
+        });
     }
 
 
@@ -113,16 +152,8 @@ public class CaldroidActivity extends Activity {
             }
 
             @Override
-            public void onDateSelectedFinish() {
-                mTvTotal.setText("共" + calendar.getSelectedDates().size() + "天");
-            }
-        });
-
-        View titlebar_img_back = findViewById(R.id.titlebar_img_back);
-        titlebar_img_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
+            public void onDateSelectedFinish(int total) {
+                mTvTotal.setText(total + "晚");
             }
         });
     }

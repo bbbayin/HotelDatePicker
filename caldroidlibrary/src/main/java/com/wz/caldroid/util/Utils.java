@@ -65,7 +65,7 @@ public class Utils {
         if (TextUtils.isEmpty(str)) {
             return 0l;
         }
-        SimpleDateFormat sdf = new SimpleDateFormat(date_yyyy_MM_dd,Locale.CHINA);
+        SimpleDateFormat sdf = new SimpleDateFormat(date_yyyy_MM_dd, Locale.CHINA);
         Date d = null;
         try {
             d = sdf.parse(str);
@@ -75,8 +75,16 @@ public class Utils {
         return d.getTime();
     }
 
-    public static List< Date > findDates(Date dBegin, Date dEnd) {
-        List lDate = new ArrayList();
+
+    /**
+     * 获取两个日期之间的所有日期
+     *
+     * @param dBegin
+     * @param dEnd
+     * @return
+     */
+    public static List<Date> findDates(Date dBegin, Date dEnd) {
+        List<Date> lDate = new ArrayList<Date>();
         lDate.add(dBegin);
         Calendar calBegin = Calendar.getInstance();
         // 使用给定的 Date 设置此 Calendar 的时间

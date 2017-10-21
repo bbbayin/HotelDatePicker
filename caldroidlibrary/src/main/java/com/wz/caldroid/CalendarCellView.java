@@ -105,9 +105,9 @@ public class CalendarCellView extends FrameLayout {
       mergeDrawableStates(drawableState, STATE_CURRENT_MONTH);
     }
 
-    if (isToday) {
+//    if (isToday) {
 //      mergeDrawableStates(drawableState, STATE_TODAY);
-    }
+//    }
 
     if (isHighlighted) {
       mergeDrawableStates(drawableState, STATE_HIGHLIGHTED);

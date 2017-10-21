@@ -2,6 +2,7 @@
 package com.wz.caldroid;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -102,6 +103,15 @@ public class MonthView extends LinearLayout {
     }
 
 
+    /**
+     * 设置单元格参数，价格，颜色，是否可点击
+     *
+     * @param month
+     * @param cells
+     * @param displayOnly
+     * @param titleTypeface
+     * @param dateTypeface
+     */
     public void init(MonthDescriptor month, List<List<MonthCellDescriptor>> cells,
                      boolean displayOnly, Typeface titleTypeface, Typeface dateTypeface) {
         Logr.d("Initializing MonthView (%d) for %s", System.identityHashCode(this), month);
@@ -126,6 +136,7 @@ public class MonthView extends LinearLayout {
                         cellView.getDayOfMonthTextView().setText(cellDate);
                     }
                     cellView.setEnabled(cell.isCurrentMonth());
+                    if (!cell.isCurrentMonth()) cellView.setVisibility(INVISIBLE);
                     cellView.setClickable(!displayOnly);
 
                     cellView.setSelectable(cell.isSelectable());
@@ -134,14 +145,31 @@ public class MonthView extends LinearLayout {
                     cellView.setToday(cell.isToday());
                     cellView.setRangeState(cell.getRangeState());
                     cellView.setHighlighted(cell.isHighlighted());
+                    if (cell.isHighlighted()){
+                        cellView.getDayOfMonthTextView().setTextColor(Color.parseColor("#666666"));
+                        cellView.getStateTextView().setTextColor(Color.parseColor("#666666"));
+                    }
                     cellView.setTag(cell);
 
-                    if (cellView.isToday())
+                    if (cellView.isToday()) {
                         cellView.getDayOfMonthTextView().setText("今天");
-                    if (cell.isBooked()){
+                    }
+                    if (cell.isBooked()) {
                         cellView.getStateTextView().setText("已租");
-                    }else {
-                        cellView.getStateTextView().setText("¥"+cell.getPrice());
+                    } else {
+                        switch (cell.getDate().getDay()) {
+                            case 1:
+                            case 2:
+                            case 3:
+                            case 4:
+                            case 5:
+                                cellView.getStateTextView().setText("¥" + cell.getPrice().getWorkdayPrice());
+                                break;
+                            default:
+                                cellView.getStateTextView().setText("¥" + cell.getPrice().getWeekendPrice());
+                                break;
+                        }
+
                     }
 
                     if (null != decorators) {

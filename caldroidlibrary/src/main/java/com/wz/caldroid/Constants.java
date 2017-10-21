@@ -13,8 +13,8 @@ public class Constants  {
             "    \"legalHolidayPrice\": \"400\"," +
             "    \"hotel_time\": [" +
             "        {" +
-            "            \"live_time\": \"2017-10-20\"," +
-            "            \"end_time\": \"2017-10-21\"" +
+            "            \"live_time\": \"2017-11-20\"," +
+            "            \"end_time\": \"2017-11-21\"" +
             "        }," +
             "        {" +
             "            \"live_time\": \"2017-10-22\"," +
