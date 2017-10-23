@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.wz.caldroid.MonthCellDescriptor.RangeState;
+import com.wz.caldroid.bean.HolidayPriceBean;
 import com.wz.caldroid.bean.PriceDescriptor;
 import com.wz.caldroid.listener.OnStarAndEndSelectedListener;
 import com.wz.caldroid.util.Utils;
@@ -94,6 +95,7 @@ public class CalendarPickerView extends ListView {
 
     private List<Date> cannotBookedList = new ArrayList<>();//选择起始日期后，实时更新不可点击的列表
     private List<Date> liveDateList = new ArrayList<>();//已经预定的，入住日期，该列表的日期可以当做新预定的结束时间（可选）
+    private List<HolidayPriceBean> holidayList = new ArrayList<>();
 
     Comparator<MonthCellDescriptor> dateCompare = new Comparator<MonthCellDescriptor>() {
         @Override
@@ -293,6 +295,7 @@ public class CalendarPickerView extends ListView {
 
         public FluentInitializer withHighlightedDates(Collection<Date> dates) {
             mBookedList = (List<Date>) dates;
+            Collections.sort(mBookedList);
             highlightDates(dates);
             return this;
         }
@@ -304,6 +307,11 @@ public class CalendarPickerView extends ListView {
 
         public FluentInitializer withHighlightedDate(Date date) {
             return withHighlightedDates(Collections.singletonList(date));
+        }
+
+        public FluentInitializer withHolidayDates(List<HolidayPriceBean> list) {
+            holidayList = list;
+            return this;
         }
 
         @SuppressLint("SimpleDateFormat")
@@ -491,11 +499,13 @@ public class CalendarPickerView extends ListView {
         @Override
         public void handleClick(MonthCellDescriptor cell) {
             Date clickedDate = cell.getDate();
-            //没有被选中的日期时，highlight不可点击
-            if (selectedCalendars.size() == 0 && cell.isHighlighted()) return;
-            //选中了入住日期时，如果点击的日期是highlight，而且不是已经预定的入住日期，不可点击
-            if (selectedCalendars.size() == 1 && cell.isHighlighted() && !liveDateList.contains(clickedDate))
+            //没有被选中的日期时或选中两个日期的时候，highlight不可点击
+            if ((selectedCalendars.size() == 0 || selectedCalendars.size() == 2) && cell.isHighlighted())
                 return;
+            //选中了入住日期时，disable的不可点选
+            if (selectedCalendars.size() == 1 && cannotBookedList.contains(clickedDate) && !isDisabledCanClick(clickedDate))
+                return;
+
             //设置了拦截的不可点击
             if (cellClickInterceptor != null && cellClickInterceptor.onCellClicked(clickedDate)) {
                 return;
@@ -517,6 +527,20 @@ public class CalendarPickerView extends ListView {
                 }
             }
         }
+    }
+
+    /**
+     * 已经置灰的日期是否可以点击
+     *
+     * @param clickDate
+     * @return
+     */
+    public boolean isDisabledCanClick(Date clickDate) {
+        if (cannotBookedList != null && cannotBookedList.size() > 0) {
+            if (clickDate.equals(cannotBookedList.get(0)))
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -619,8 +643,8 @@ public class CalendarPickerView extends ListView {
                 cell.setSelected(true);
                 if (mBookedList.size() != 0) {
                     //根据已经选择的起始日期，更新之后的可点击区域
-                    if (date.before(mBookedList.get(0)))
-                        disableDates(mBookedList.get(0), maxCal.getTime());
+                    if (mBookedList.get(mBookedList.size() - 1).after(date))
+                        disableDates(getMinBookedDate(date), maxCal.getTime());
                 }
             } else if (selectedCalendars.size() == 1) {
                 //已经选了起始日期
@@ -672,7 +696,8 @@ public class CalendarPickerView extends ListView {
                     mOnStarAndEndSelectedListener.onEndDateSelected(date);
                     //计算价格
                     float price = 0;
-                    selectedCells.sort(dateCompare);
+//                    selectedCells.sort(dateCompare);
+                    Collections.sort(selectedCells, dateCompare);
                     for (int i = 0; i < selectedCells.size() - 1; i++) {
                         price += selectedCells.get(i).getPrice();
                         Log.d("单个价格", selectedCells.get(i).getPrice() + "---第" + i + "个-----" + selectedCells.get(i).getDate());
@@ -687,6 +712,20 @@ public class CalendarPickerView extends ListView {
         // Update the adapter.
         validateAndUpdate();
         return date != null;
+    }
+
+    /**
+     * 获取比当前选中日期大的第一个预订日期
+     *
+     * @param date
+     * @return
+     */
+    private Date getMinBookedDate(Date date) {
+        for (int i = 0; i < mBookedList.size(); i++) {
+            if (mBookedList.get(i).after(date))
+                return mBookedList.get(i);
+        }
+        return date;
     }
 
     private void clearOldSelections() {
@@ -799,6 +838,7 @@ public class CalendarPickerView extends ListView {
                 cell.setHighlighted(false);
             }
         }
+        cannotBookedList.clear();
 //        validateAndUpdate();
     }
 

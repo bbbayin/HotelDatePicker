@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSON;
 import com.wz.caldroid.CalendarCellDecorator;
 import com.wz.caldroid.CalendarPickerView;
 import com.wz.caldroid.Constants;
+import com.wz.caldroid.bean.HolidayPriceBean;
 import com.wz.caldroid.bean.PriceDescriptor;
 import com.wz.caldroid.listener.OnStarAndEndSelectedListener;
 import com.wz.caldroid.util.Utils;
@@ -59,12 +60,14 @@ public class CaldroidActivity extends Activity {
 
         ArrayList<Date> dates = new ArrayList<Date>();
         ArrayList<Date> liveDates = new ArrayList<Date>();
+        ArrayList<HolidayPriceBean> holidayList = new ArrayList<>();
 
         //设置已租日期
         try {
             JSONObject oJson = new JSONObject(Constants.TestJson);
             JSONArray arrOrderedDate = oJson.getJSONArray("hotel_time");
             if (arrOrderedDate != null && arrOrderedDate.length() > 0) {
+                //获取入住时间
                 for (int i = 0; i < arrOrderedDate.length(); i++) {
                     JSONObject objDate = (JSONObject) arrOrderedDate.get(i);
                     Date live_time = new Date(Utils.getTimeStemp(objDate.getString("live_time")));
@@ -73,6 +76,16 @@ public class CaldroidActivity extends Activity {
                     liveDates.add(live_time);
                 }
             }
+            JSONArray legalArr = oJson.getJSONArray("legalHolidayPrice");
+            if (legalArr != null && legalArr.length() > 0) {
+                //获取节假日数据
+                for (int i = 0; i < legalArr.length(); i++) {
+                    String legalHoliday = legalArr.getJSONObject(i).getString("legalHoliday");
+                    String holidayPrice = legalArr.getJSONObject(i).getString("legalHoliday");
+                    holidayList.add(new HolidayPriceBean(new Date(Utils.getTimeStemp(legalHoliday)), holidayPrice));
+                }
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -122,7 +135,7 @@ public class CaldroidActivity extends Activity {
                 if (null != calendar.getSelectedDate() && calendar.getSelectedDates().size() >= 2) {
                     intent.putExtra("START_DATA_TIME", calendar.getSelectedDates().get(0).getTime());
                     intent.putExtra("END_DATA_TIME", calendar.getSelectedDates().get(calendar.getSelectedDates().size() - 1).getTime());
-                    intent.putExtra("TOTAL_PRICE",totalPrice);
+                    intent.putExtra("TOTAL_PRICE", totalPrice);
                     setResult(2, intent);
                     finish();
                 }
