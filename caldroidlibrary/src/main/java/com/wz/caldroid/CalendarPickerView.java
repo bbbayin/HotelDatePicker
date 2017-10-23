@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -93,6 +95,16 @@ public class CalendarPickerView extends ListView {
     private List<Date> cannotBookedList = new ArrayList<>();//选择起始日期后，实时更新不可点击的列表
     private List<Date> liveDateList = new ArrayList<>();//已经预定的，入住日期，该列表的日期可以当做新预定的结束时间（可选）
 
+    Comparator<MonthCellDescriptor> dateCompare = new Comparator<MonthCellDescriptor>() {
+        @Override
+        public int compare(MonthCellDescriptor o1, MonthCellDescriptor o2) {
+            if (o1.getDate().before(o2.getDate()))
+                return -1;
+            else if (o1.getDate().after(o2.getDate()))
+                return 1;
+            else return 0;
+        }
+    };
 
     public void setDecorators(List<CalendarCellDecorator> decorators) {
         this.decorators = decorators;
@@ -140,13 +152,13 @@ public class CalendarPickerView extends ListView {
         weekdayNameFormat = new SimpleDateFormat(context.getString(R.string.day_name_format), locale);
         fullDateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
 
-//        if (isInEditMode()) {
-//            Calendar nextYear = Calendar.getInstance(locale);
-//            nextYear.add(Calendar.YEAR, 1);
-//
-//            init(new Date(), nextYear.getTime(),null) //
-//                    .withSelectedDate(new Date());
-//        }
+        if (isInEditMode()) {
+            Calendar nextYear = Calendar.getInstance(locale);
+            nextYear.add(Calendar.YEAR, 1);
+
+            init(new Date(), nextYear.getTime(), null) //
+                    .withSelectedDate(new Date());
+        }
     }
 
     /**
@@ -186,7 +198,6 @@ public class CalendarPickerView extends ListView {
         maxCal = Calendar.getInstance(locale);
         monthCounter = Calendar.getInstance(locale);
         for (MonthDescriptor month : months) {
-//            month.setLabel(monthNameFormat.format(month.getDate()));
             month.setLabel(Utils.formatDateToMMYYYY(month.getDate()));
         }
         weekdayNameFormat =
@@ -602,7 +613,8 @@ public class CalendarPickerView extends ListView {
 
         if (date != null) {
             //选择起始日期
-            if (selectedCells.size() == 0 || !selectedCells.get(0).equals(cell)) {
+//            if (selectedCells.size() == 0 || !selectedCells.get(0).equals(cell)) {
+            if (selectedCells.size() == 0) {
                 selectedCells.add(cell);
                 cell.setSelected(true);
                 if (mBookedList.size() != 0) {
@@ -613,13 +625,21 @@ public class CalendarPickerView extends ListView {
             } else if (selectedCalendars.size() == 1) {
                 //已经选了起始日期
                 if (date.equals(selectedCalendars.get(0).getTime())) {
-                    //再次点击，取消选择
+                    //重复点击，取消选择
                     clearOldSelections();
                     clearDisabledDates();
                     validateAndUpdate();
                     return false;
+                } else {
+                    selectedCells.add(cell);
+                    cell.setSelected(true);
+                    clearDisabledDates();
                 }
+            } else if (selectedCalendars.size() == 2) {
+                //点击了结束日期，do nothing
+                if (date.equals(selectedCalendars.get(1).getTime())) return false;
             }
+
             selectedCalendars.add(newlySelectedCal);
 
             if (selectionMode == SelectionMode.RANGE && selectedCells.size() > 1) {
@@ -650,7 +670,15 @@ public class CalendarPickerView extends ListView {
                     //结束
                 else if (selectedCalendars.size() == 2) {
                     mOnStarAndEndSelectedListener.onEndDateSelected(date);
-                    mOnStarAndEndSelectedListener.onDateSelectedFinish(selectedCells.size() - 1);
+                    //计算价格
+                    float price = 0;
+                    selectedCells.sort(dateCompare);
+                    for (int i = 0; i < selectedCells.size() - 1; i++) {
+                        price += selectedCells.get(i).getPrice();
+                        Log.d("单个价格", selectedCells.get(i).getPrice() + "---第" + i + "个-----" + selectedCells.get(i).getDate());
+                    }
+                    Log.d("价格统计", String.valueOf(price));
+                    mOnStarAndEndSelectedListener.onDateSelectedFinish(selectedCells.size() - 1, price);
                     clearDisabledDates();
                 }
             }
@@ -710,8 +738,8 @@ public class CalendarPickerView extends ListView {
 
     public void highlightDates(Collection<Date> dates) {
         for (Date date : dates) {
+            if (date.before(minCal.getTime())) continue;
             validateDate(date);
-
             MonthCellWithMonthIndex monthCellWithMonthIndex = getMonthCellWithIndexByDate(date);
             if (monthCellWithMonthIndex != null) {
                 Calendar newlyHighlightedCal = Calendar.getInstance();
@@ -850,20 +878,27 @@ public class CalendarPickerView extends ListView {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            MonthView monthView = (MonthView) convertView;
-            if (monthView == null
-                    || !monthView.getTag(R.id.day_view_adapter_class).equals(dayViewAdapter.getClass())) {
-                monthView =
-                        MonthView.create(parent, inflater, weekdayNameFormat, listener, today, dividerColor,
-                                dayBackgroundResId, dayTextColorResId, titleTextColor, displayHeader,
-                                headerTextColor, decorators, locale, dayViewAdapter);
-                monthView.setTag(R.id.day_view_adapter_class, dayViewAdapter.getClass());
-            } else {
-                monthView.setDecorators(decorators);
-            }
-            monthView.init(months.get(position), cells.get(position), displayOnly, titleTypeface,
+//            MonthView monthView = (MonthView) convertView;
+//            if (monthView == null
+//                    || !monthView.getTag(R.id.day_view_adapter_class).equals(dayViewAdapter.getClass())) {
+//                monthView =
+//                        MonthView.create(parent, inflater, weekdayNameFormat, listener, today, dividerColor,
+//                                dayBackgroundResId, dayTextColorResId, titleTextColor, displayHeader,
+//                                headerTextColor, decorators, locale, dayViewAdapter);
+//                monthView.setTag(R.id.day_view_adapter_class, dayViewAdapter.getClass());
+//            } else {
+//                monthView.setDecorators(decorators);
+//            }
+//            monthView.init(months.get(position), cells.get(position), displayOnly, titleTypeface,
+//                    dateTypeface);
+
+            MonthView m =
+                    MonthView.create(parent, inflater, weekdayNameFormat, listener, today, dividerColor,
+                            dayBackgroundResId, dayTextColorResId, titleTextColor, displayHeader,
+                            headerTextColor, decorators, locale, dayViewAdapter);
+            m.init(months.get(position), cells.get(position), displayOnly, titleTypeface,
                     dateTypeface);
-            return monthView;
+            return m;
         }
     }
 
@@ -908,9 +943,24 @@ public class CalendarPickerView extends ListView {
                     }
                 }
 
+                //计算当前价格
+                float price = 0;
+                switch (date.getDay()) {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        price = Float.parseFloat(priceDescriptor.getWorkdayPrice());
+                        break;
+                    default:
+                        price = Float.parseFloat(priceDescriptor.getWeekendPrice());
+                        break;
+                }
+
                 weekCells.add(
                         new MonthCellDescriptor(date, isCurrentMonth, isSelectable, isSelected, isToday,
-                                isHighlighted, value, rangeState, false, priceDescriptor));
+                                isHighlighted, value, rangeState, false, price));
                 cal.add(DATE, 1);
             }
         }

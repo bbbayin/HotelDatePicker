@@ -23,7 +23,7 @@ class MonthCellDescriptor {
     private RangeState rangeState;
 
     private boolean isBooked;//该天的状态，是否被预订
-    private PriceDescriptor price;//价格
+    private float price;//价格
 
     public boolean isBooked() {
         return isBooked;
@@ -33,11 +33,11 @@ class MonthCellDescriptor {
         isBooked = booked;
     }
 
-    public PriceDescriptor getPrice() {
+    public float getPrice() {
         return price;
     }
 
-    public void setPrice(PriceDescriptor price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 
@@ -56,7 +56,7 @@ class MonthCellDescriptor {
      * @param price
      */
     MonthCellDescriptor(Date date, boolean currentMonth, boolean selectable, boolean selected,
-                        boolean today, boolean highlighted, int value, RangeState rangeState, boolean isBooked, PriceDescriptor price) {
+                        boolean today, boolean highlighted, int value, RangeState rangeState, boolean isBooked, float price) {
         this.date = date;
         isCurrentMonth = currentMonth;
         isSelectable = selectable;

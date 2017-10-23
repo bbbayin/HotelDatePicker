@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.wz.caldroid.util.Utils;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -16,6 +18,8 @@ public class MainActivity extends AppCompatActivity {
     private Button time_choice_view;
     private TextView tvStartTime;
     private TextView tvEndTime;
+    private TextView mTvPrice;
+    private String mPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         time_choice_view = (Button) findViewById(R.id.time_choice_view);
         tvStartTime = (TextView) findViewById(R.id.tv_start_time);
         tvEndTime = (TextView) findViewById(R.id.tv_end_time);
+        mTvPrice = (TextView) findViewById(R.id.tv_total_price);
         time_choice_view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -44,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == 2) {
                 startTime = data.getLongExtra("START_DATA_TIME", 0);
                 endTime = data.getLongExtra("END_DATA_TIME", 0);
+                mPrice = data.getStringExtra("TOTAL_PRICE");
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                 Date d1 = new Date(startTime);
                 Date d2 = new Date(endTime);
@@ -52,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 if (startTime > 0 && endTime>0) {
                     tvStartTime.setText(t1);
                     tvEndTime.setText(t2);
+                    mTvPrice.setText(Utils.FormatDotNumber(mPrice)+"元");
                 } else {
                     return;
                 }

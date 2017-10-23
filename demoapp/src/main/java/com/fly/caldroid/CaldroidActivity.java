@@ -35,6 +35,9 @@ public class CaldroidActivity extends Activity {
     private TextView mTvTotal;
     private TextView mTvEndDay;
     private TextView mTvStartDay;
+    private Calendar mNextYear;
+    private Calendar mLastYear;
+    private String totalPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,11 +82,11 @@ public class CaldroidActivity extends Activity {
         Bundle myBundle = getIntent().getExtras();
         long seleteTime = myBundle.getLong("selete_time");
 
-        final Calendar nextYear = Calendar.getInstance();
-        nextYear.add(Calendar.MONTH, 3);
+        mNextYear = Calendar.getInstance();
+        mNextYear.add(Calendar.MONTH, 3);
 
-        final Calendar lastYear = Calendar.getInstance();
-        lastYear.add(Calendar.MONTH, 0);
+        mLastYear = Calendar.getInstance();
+        mLastYear.add(Calendar.MONTH, 0);
 
         calendar = (CalendarPickerView) findViewById(R.id.calendar_view);
         mTvStartDay = (TextView) findViewById(R.id.list_header_tv_order_day);
@@ -92,10 +95,15 @@ public class CaldroidActivity extends Activity {
 
 
         calendar.setDecorators(Collections.<CalendarCellDecorator>emptyList());
-        calendar.init(lastYear.getTime(), nextYear.getTime(), priceDescriptor) //
+        //设置日历的开始时间，结束时间，价格描述
+        calendar.init(mLastYear.getTime(), mNextYear.getTime(), priceDescriptor) //
+                //可多选的模式
                 .inMode(CalendarPickerView.SelectionMode.RANGE) //
+                //初始化时带入已经选中的时间
 //                .withSelectedDate(dates.get(0))
+                //设置已经出租的日期
                 .withHighlightedDates(dates)
+                //设置入住时间，点击事件判断要用
                 .withLiveDates(liveDates);
         initButtonListeners();
 
@@ -113,7 +121,8 @@ public class CaldroidActivity extends Activity {
                 Intent intent = new Intent();
                 if (null != calendar.getSelectedDate() && calendar.getSelectedDates().size() >= 2) {
                     intent.putExtra("START_DATA_TIME", calendar.getSelectedDates().get(0).getTime());
-                    intent.putExtra("END_DATA_TIME", calendar.getSelectedDates().get(calendar.getSelectedDates().size()-1).getTime());
+                    intent.putExtra("END_DATA_TIME", calendar.getSelectedDates().get(calendar.getSelectedDates().size() - 1).getTime());
+                    intent.putExtra("TOTAL_PRICE",totalPrice);
                     setResult(2, intent);
                     finish();
                 }
@@ -152,8 +161,9 @@ public class CaldroidActivity extends Activity {
             }
 
             @Override
-            public void onDateSelectedFinish(int total) {
+            public void onDateSelectedFinish(int total, float price) {
                 mTvTotal.setText(total + "晚");
+                totalPrice = String.valueOf(price);
             }
         });
     }

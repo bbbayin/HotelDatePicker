@@ -5,10 +5,13 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.wz.caldroid.util.Utils;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -145,11 +148,14 @@ public class MonthView extends LinearLayout {
                     cellView.setToday(cell.isToday());
                     cellView.setRangeState(cell.getRangeState());
                     cellView.setHighlighted(cell.isHighlighted());
-                    if (cell.isHighlighted()){
+                    if (cell.isHighlighted()) {
                         cellView.getDayOfMonthTextView().setTextColor(Color.parseColor("#666666"));
                         cellView.getStateTextView().setTextColor(Color.parseColor("#666666"));
                     }
-                    cellView.setTag(cell);
+                    if (!cell.isSelectable()) {
+                        cellView.getDayOfMonthTextView().setTextColor(Color.parseColor("#aaaaaa"));
+                        cellView.getStateTextView().setTextColor(Color.parseColor("#aaaaaa"));
+                    }
 
                     if (cellView.isToday()) {
                         cellView.getDayOfMonthTextView().setText("今天");
@@ -157,20 +163,9 @@ public class MonthView extends LinearLayout {
                     if (cell.isBooked()) {
                         cellView.getStateTextView().setText("已租");
                     } else {
-                        switch (cell.getDate().getDay()) {
-                            case 1:
-                            case 2:
-                            case 3:
-                            case 4:
-                            case 5:
-                                cellView.getStateTextView().setText("¥" + cell.getPrice().getWorkdayPrice());
-                                break;
-                            default:
-                                cellView.getStateTextView().setText("¥" + cell.getPrice().getWeekendPrice());
-                                break;
-                        }
-
+                        cellView.getStateTextView().setText("¥" + Utils.FormatDotNumber(String.valueOf(cell.getPrice())));
                     }
+                    cellView.setTag(cell);
 
                     if (null != decorators) {
                         for (CalendarCellDecorator decorator : decorators) {

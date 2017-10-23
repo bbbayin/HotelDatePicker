@@ -38,13 +38,23 @@ public class CalendarCellView extends FrameLayout {
   private boolean isCurrentMonth = false;
   private boolean isToday = false;
   private boolean isHighlighted = false;
+  private boolean isOutOfDate = true;//是否在可选的日期内
   private RangeState rangeState = RangeState.NONE;
   private TextView dayOfMonthTextView;
   private TextView stateTextView;
 
+
   @SuppressWarnings("UnusedDeclaration") //
   public CalendarCellView(Context context, AttributeSet attrs) {
     super(context, attrs);
+  }
+
+  public boolean isOutOfDate() {
+    return isOutOfDate;
+  }
+
+  public void setOutOfDate(boolean outOfDate) {
+    isOutOfDate = outOfDate;
   }
 
   public void setSelectable(boolean isSelectable) {

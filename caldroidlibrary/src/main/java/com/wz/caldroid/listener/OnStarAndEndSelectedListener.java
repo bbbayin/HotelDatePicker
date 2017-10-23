@@ -13,5 +13,5 @@ public interface OnStarAndEndSelectedListener {
 
     void onEndDateSelected(Date date);
 
-    void onDateSelectedFinish(int totalDays);
+    void onDateSelectedFinish(int totalDays,float totalPrice);
 }
