@@ -27,7 +27,7 @@ ext {
     minSdkVersion = 19
     targetSdkVersion = 25
     compileSdkVersion = 25
-    buildToolsVersion = '25.0.2'
+    buildToolsVersion = '25.0.0'
 
     // BottomSheetPickers versioning
     versionName = '1.0.0'

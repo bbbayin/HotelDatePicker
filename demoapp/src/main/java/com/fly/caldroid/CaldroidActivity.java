@@ -81,7 +81,7 @@ public class CaldroidActivity extends Activity {
                 //获取节假日数据
                 for (int i = 0; i < legalArr.length(); i++) {
                     String legalHoliday = legalArr.getJSONObject(i).getString("legalHoliday");
-                    String holidayPrice = legalArr.getJSONObject(i).getString("legalHoliday");
+                    String holidayPrice = legalArr.getJSONObject(i).getString("holidayPrice");
                     holidayList.add(new HolidayPriceBean(new Date(Utils.getTimeStemp(legalHoliday)), holidayPrice));
                 }
             }
@@ -117,7 +117,9 @@ public class CaldroidActivity extends Activity {
                 //设置已经出租的日期
                 .withHighlightedDates(dates)
                 //设置入住时间，点击事件判断要用
-                .withLiveDates(liveDates);
+                .withLiveDates(liveDates)
+                //设置节假日价格
+                .withHolidayDates(holidayList);
         initButtonListeners();
 
         //click event

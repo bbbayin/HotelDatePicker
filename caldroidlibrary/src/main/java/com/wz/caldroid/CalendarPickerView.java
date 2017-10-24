@@ -309,8 +309,22 @@ public class CalendarPickerView extends ListView {
             return withHighlightedDates(Collections.singletonList(date));
         }
 
+        /**
+         * 初始化指定价格的日期
+         *
+         * @param list
+         * @return
+         */
         public FluentInitializer withHolidayDates(List<HolidayPriceBean> list) {
             holidayList = list;
+            for (int i = 0; i < holidayList.size(); i++) {
+                HolidayPriceBean holidayPriceBean = holidayList.get(i);
+                MonthCellWithMonthIndex cellWithIndexByDate = getMonthCellWithIndexByDate(holidayPriceBean.getHoliday());
+                if (cellWithIndexByDate != null) {
+                    cellWithIndexByDate.cell.setPrice(Float.parseFloat(holidayPriceBean.getHolidayPrice()));
+                }
+            }
+            validateAndUpdate();
             return this;
         }
 
@@ -778,7 +792,7 @@ public class CalendarPickerView extends ListView {
     public void highlightDates(Collection<Date> dates) {
         for (Date date : dates) {
             if (date.before(minCal.getTime())) continue;
-            validateDate(date);
+//            validateDate(date);
             MonthCellWithMonthIndex monthCellWithMonthIndex = getMonthCellWithIndexByDate(date);
             if (monthCellWithMonthIndex != null) {
                 Calendar newlyHighlightedCal = Calendar.getInstance();

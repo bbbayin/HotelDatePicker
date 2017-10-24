@@ -1,1 +1,1 @@
-include ':app', ':bottomsheetpickers', ':demoapp', ':caldroidlibrary'
+include ':demoapp', ':caldroidlibrary'
