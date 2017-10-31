@@ -519,6 +519,11 @@ public class CalendarPickerView extends ListView {
             //选中了入住日期时，disable的不可点选
             if (selectedCalendars.size() == 1 && cannotBookedList.contains(clickedDate) && !isDisabledCanClick(clickedDate))
                 return;
+            if (selectedCalendars.size() == 1) {
+                //选中了一个日期，再点选之前的已租日期，拦截
+                if (clickedDate.before(selectedCalendars.get(0).getTime()) && mBookedList.contains(clickedDate))
+                    return;
+            }
 
             //设置了拦截的不可点击
             if (cellClickInterceptor != null && cellClickInterceptor.onCellClicked(clickedDate)) {
